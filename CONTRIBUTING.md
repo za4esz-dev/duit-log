@@ -1,6 +1,6 @@
-# Contributing to DuitLog
+# Codebase Conventions
 
-DuitLog is a personal project, but contributions and suggestions are welcome.
+> DuitLog is a feature-complete template. This document describes the coding conventions used throughout the project — useful if you've forked the repo and want to maintain consistency as you customize it.
 
 ## Development Setup
 
@@ -33,8 +33,13 @@ docs: update Google Sheets setup instructions
 chore: upgrade React Router to v7.13
 ```
 
-## Pull Requests
+## Customizing Your Fork
 
-- Describe **what** changed and **why**.
-- Include screenshots for UI changes.
-- Ensure `npm run typecheck` passes before opening a PR.
+- Edit expense sources, categories, and payment methods in `app/lib/constants.ts`
+- Update environment variables in `.env` (see `.env.example` for the template)
+- Modify PWA branding in `public/manifest.webmanifest` and replace icon files
+- Adjust Google Sheet column headers to match your constants
+
+## Upstream Contributions
+
+This project is not actively seeking contributions, but if you find a bug or have an improvement that benefits all users of the template, feel free to open an issue or PR.

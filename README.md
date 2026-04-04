@@ -1,6 +1,6 @@
 # DuitLog
 
-> A zero-friction expense tracker PWA backed by Google Sheets.
+> An open-source expense tracker template — a mobile-first PWA backed by Google Sheets. Fork it and make it yours.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)
@@ -8,9 +8,9 @@
 
 ## Overview
 
-DuitLog is a mobile-first Progressive Web App for logging daily expenses in under 10 seconds. It uses Google Sheets as the single source of truth — the app is purely a fast input surface, while all analysis (pivots, charts, dashboards) lives in Sheets. Designed for couples who want a shared, no-fuss expense tracker they can launch from the phone home screen.
+DuitLog is a ready-to-fork expense tracker template built as a mobile-first PWA. It logs daily expenses in under 10 seconds, using Google Sheets as the single source of truth — the app is purely a fast input surface, while all analysis (pivots, charts, dashboards) lives in Sheets.
 
-> **Note:** This app was originally built for my wife and me to track our daily expenses together. Because of that, some values are hardcoded to fit our specific needs — things like expense sources (`Danny`, `Dewi`, `Together`), payment methods (`Cash`, `BCA Debit`, `QRIS`), categories, the passcode-based auth, and the Google Sheet ID. That said, the foundation is designed to be extensible. Feel free to fork this repo and adapt these values to your own setup — most of them live in `app/lib/constants.ts` and `.env`.
+Originally built for a couple tracking shared expenses in Indonesia, but designed to be easily customized for any use case. See [Make It Yours](#make-it-yours) to adapt it to your needs.
 
 ### How it works
 
@@ -52,6 +52,31 @@ DuitLog works offline with a two-layer sync system:
 - **Navigation fallback** — Failed navigation requests fall back to a cached `/offline` page.
 - **Static asset caching** — JS, CSS, images, and manifest use a stale-while-revalidate strategy.
 
+## Make It Yours
+
+DuitLog is designed to be forked and customized. Here's what to change:
+
+### Expense Values (`app/lib/constants.ts`)
+
+Edit `CATEGORIES`, `METHODS`, and `SOURCES` arrays to match your needs. Zod validation schemas in `app/lib/validation.ts` derive from these arrays, so they update automatically.
+
+### Environment Variables (`.env`)
+
+Copy `.env.example` and fill in your own values:
+- `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_PRIVATE_KEY` — your GCP service account
+- `GOOGLE_SPREADSHEET_ID` — your Google Sheet
+- `AUTH_PASSCODE` — your access code
+- `SESSION_SECRET` — a random string for cookie signing
+
+### Google Sheet Columns
+
+Your sheet tab headers (row 1) should match the values in `constants.ts` — particularly the Source and Method columns.
+
+### PWA Branding
+
+- Edit `public/manifest.webmanifest` to change the app name, colors, etc.
+- Replace `public/icon-192.png`, `public/icon-512.png`, and `public/apple-touch-icon.png` with your own icons.
+
 ## Tech Stack
 
 | Layer      | Technology                             |
@@ -75,8 +100,8 @@ DuitLog works offline with a two-layer sync system:
 ### Setup
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/dannycahyo/duit-log.git
+# 1. Fork the repo on GitHub, then clone your fork
+git clone https://github.com/<your-username>/duit-log.git
 cd duit-log
 
 # 2. Install dependencies
@@ -197,11 +222,16 @@ duit-log/
 
 The `@react-router/node` adapter handles the serverless function configuration.
 
-## Roadmap
+## Ideas for Forkers
 
-- **v1.5:** Today's spending total widget
-- **v2:** Category/method management, auto sheet tab creation
-- **v3:** Receipt photo upload, monthly summaries, Google Sign-In
+DuitLog is feature-complete as a template. These are not planned features, but ideas if you want to extend it:
+
+- Today's spending total widget
+- Category/method management from the UI
+- Auto sheet tab creation
+- Receipt photo upload via Google Drive
+- Monthly summary views
+- Google Sign-In for per-user auth
 
 ## License
 

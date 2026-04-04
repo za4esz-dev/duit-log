@@ -1,5 +1,7 @@
 # PRD — Product Requirement Document
 
+> **Note:** This PRD documents the original design decisions behind DuitLog. It is preserved as a reference for anyone forking the project to understand the "why" behind each feature. DuitLog is feature-complete as a template — no further phases are planned upstream.
+
 ## Problem Statement
 
 Logging daily expenses is a high-frequency, low-effort task — yet it carries enough friction (opening a spreadsheet app, navigating to the right cell, formatting correctly) that it gets skipped. Missed entries compound into inaccurate budgets.
@@ -22,6 +24,8 @@ We already rely on Google Sheets for analysis (pivot tables, monthly summaries, 
 - Native app stores distribution.
 
 ## User Personas
+
+> The following personas reflect the original use case (a couple in Indonesia tracking shared expenses). Forkers should define their own personas to guide customization.
 
 **Danny** — Tech-savvy, logs expenses immediately after paying. Prefers quick numeric input. Occasionally reviews recent entries to catch duplicates.
 
@@ -53,7 +57,7 @@ We already rely on Google Sheets for analysis (pivot tables, monthly summaries, 
 
 ## Feature List
 
-### MVP (v1)
+### Shipped Features
 
 | Feature                                                       | Priority |
 | ------------------------------------------------------------- | -------- |
@@ -63,17 +67,17 @@ We already rely on Google Sheets for analysis (pivot tables, monthly summaries, 
 | PWA installability (manifest + basic service worker)          | P0       |
 | Simple passcode gate (shared secret, cookie-based session)    | P1       |
 | Recent Expenses view (last 20 rows, read-only)                | P1       |
+| Offline queue with IndexedDB + background sync                | P1       |
 
-### Future Phases
+### Ideas for Forkers
 
-| Feature                                          | Phase |
-| ------------------------------------------------ | ----- |
-| Today's spending total (quick glance widget)     | v1.5  |
-| Offline queue with background sync               | v2    |
-| Category/method management from UI               | v2    |
-| Receipt photo attachment (Drive upload)          | v3    |
-| Monthly summary pulled from Sheets analysis tabs | v3    |
-| Per-user auth with Google Sign-In                | v3    |
+> The following features were considered during planning but are not implemented. They are preserved as inspiration for anyone extending the template.
+
+- Today's spending total (quick glance widget)
+- Category/method management from UI
+- Receipt photo attachment (Drive upload)
+- Monthly summary pulled from Sheets analysis tabs
+- Per-user auth with Google Sign-In
 
 ## UX Expectations
 

@@ -1,5 +1,7 @@
 # TRD — Technical Requirement Document
 
+> **Note:** This TRD documents the technical architecture of DuitLog as shipped. It is preserved as a reference for anyone forking the project to understand the system design and decisions behind it.
+
 ## High-Level Architecture
 
 ```
@@ -37,13 +39,15 @@ React Router v7 in Framework Mode runs on the server (deployed to Vercel via `@r
 
 > The `Timestamp` column records _when the entry was submitted_, while `Date` records _when the expense occurred_. This distinction lets the Sheets analysis tabs do date-based aggregation on `Date` while preserving an audit trail via `Timestamp`.
 
-### Predefined Values (hardcoded in v1, configurable later)
+### Predefined Values (defined in `app/lib/constants.ts` — edit to customize)
 
 **Categories**: `Food`, `Transport`, `Groceries`, `Utilities`, `Health`, `Entertainment`, `Shopping`, `Education`, `Other`
 
-**Payment Methods**: `Cash`, `BCA Debit`, `BCA Credit`, `GoPay`, `OVO`, `ShopeePay`, `Transfer`, `Other`
+**Payment Methods**: `Cash`, `BCA Debit`, `QRIS`
 
-**Users**: `Danny`, `Wife`
+**Sources**: `Danny`, `Dewi`, `Together`
+
+> **Note:** The values above reflect the shipped code in `app/lib/constants.ts`. The original planning document had different values (8 payment methods, different user labels). Always refer to `constants.ts` as the source of truth.
 
 ## API Contract: Action Function
 
@@ -217,19 +221,17 @@ export async function getRecentExpenses(count = 20) {
 
 **Cache-first for static assets** — App shell (HTML, CSS, JS bundles, icons) cached on install for fast repeat loads.
 
-**Offline behavior (v1)**: Show a clear "You're offline" message on the form. Do **not** queue submissions silently in v1 — this avoids silent data loss if the queue fails. A future phase can add Background Sync.
+**Offline behavior**: DuitLog stores offline submissions in an IndexedDB queue and syncs them via Background Sync (with a client-side fallback on browsers without `SyncManager`, e.g. iOS Safari). A Web Lock (`duitlog-sync`) prevents concurrent sync. An amber banner indicates offline status, and the submit button changes to "Save Offline".
 
-**Offline behavior (v2+)**: Implement an IndexedDB-backed queue. On form submit while offline, store the entry locally and register a Background Sync event. When connectivity resumes, replay the queue. Show a badge on the form indicating N pending entries.
-
-### Offline Queue (Future — v2)
+### Offline Queue
 
 ```
 Submit → Online?
   ├─ Yes → POST to action → success
   └─ No  → Save to IndexedDB queue
-           → Register Background Sync
+           → Register Background Sync (or listen for online event)
            → Show "Saved offline, will sync" toast
-           → On reconnect: replay queue → clear
+           → On reconnect: acquire Web Lock → replay queue → clear
 ```
 
 ## Routing Structure (React Router v7 Framework Mode)
@@ -256,7 +258,7 @@ app/
 
 | Route         | `loader`                           | `action`                     | Purpose             |
 | ------------- | ---------------------------------- | ---------------------------- | ------------------- |
-| `_index.tsx`  | (none in v1)                       | Validate + append to Sheets  | Main expense form   |
+| `_index.tsx`  | (none)                             | Validate + append to Sheets  | Main expense form   |
 | `history.tsx` | Read last 20 rows from Sheets      | (none)                       | Recent entries list |
 | `login.tsx`   | Check if already authed → redirect | Verify passcode → set cookie | Simple auth gate    |
 
@@ -293,16 +295,17 @@ export default function AddExpense() {
 
 ## Data Fetching / Caching
 
-- **No client-side cache in v1.** Every navigation to `/history` calls the loader, which reads from Sheets. This keeps things simple and guarantees fresh data.
-- **Future**: Add `Cache-Control` headers or `stale-while-revalidate` on the loader response if Sheets reads become slow (unlikely at our scale).
-- Sheets API calls from the server are fast (~100–300ms). Acceptable for our use case.
+- Every navigation to `/history` calls the loader, which reads from Sheets. This keeps things simple and guarantees fresh data.
+- Previously loaded history entries are cached in `localStorage` for offline viewing.
+- Sheets API calls from the server are fast (~100–300ms). Acceptable for this use case.
+- Forkers needing lower latency could add `Cache-Control` headers or `stale-while-revalidate` on the loader response.
 
-## Authentication (v1 — Simple Passcode)
+## Authentication (Passcode)
 
 1. A shared passcode stored as `AUTH_PASSCODE` env var.
 2. On first visit (no session cookie), redirect to `/login`.
-3. User enters the passcode. The `login` action compares it, and on match, sets an `HttpOnly` cookie (`session=<signed-value>`).
+3. User enters the passcode. The `login` action compares it, and on match, sets an `HttpOnly` cookie (`session=<signed-value>`) with a 30-day expiry.
 4. A utility function `requireAuth(request)` checks the cookie in every loader/action. Throws a redirect to `/login` if missing/invalid.
 5. Cookie signing uses a `SESSION_SECRET` env var.
 
-This is intentionally minimal. A future version can swap in Google Sign-In or any proper auth.
+This is intentionally minimal. Forkers may want to replace this with Google Sign-In or another auth provider.
