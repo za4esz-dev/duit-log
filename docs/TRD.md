@@ -45,8 +45,6 @@ React Router v7 in Framework Mode runs on the server (deployed to Vercel via `@r
 
 **Payment Methods**: `Cash`, `BCA Debit`, `QRIS`
 
-**Sources**: `Danny`, `Dewi`, `Together`
-
 > **Note:** The values above reflect the shipped code in `app/lib/constants.ts`. The original planning document had different values (8 payment methods, different user labels). Always refer to `constants.ts` as the source of truth.
 
 ## API Contract: Action Function

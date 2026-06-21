@@ -63,11 +63,11 @@ Edit `CATEGORIES`, `METHODS`, and `SOURCES` arrays to match your needs. Zod vali
 ### Environment Variables (`.env`)
 
 Copy `.env.example` and fill in your own values:
-- `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_PRIVATE_KEY` — your GCP service account
-- `GOOGLE_SPREADSHEET_ID` — your Google Sheet
-- `AUTH_PASSCODE` — your access code
-- `SESSION_SECRET` — a random string for cookie signing
-
+- `GOOGLE_SERVICE_ACCOUNT_EMAIL` -
+- `GOOGLE_PRIVATE_KEY` — 
+- `GOOGLE_SPREADSHEET_ID` — 
+- `AUTH_PASSCODE` — 
+- `SESSION_SECRET` — 
 ### Google Sheet Columns
 
 Your sheet tab headers (row 1) should match the values in `constants.ts` — particularly the Source and Method columns.

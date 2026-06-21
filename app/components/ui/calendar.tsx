@@ -22,7 +22,7 @@ export function Calendar({ showOutsideDays = true, ...props }: CalendarProps) {
         selected: "bg-slate-900 text-white rounded-md hover:bg-slate-800",
         today: "font-bold text-slate-900",
         outside: "text-slate-400 opacity-50",
-        disabled: "text-slate-300 pointer-events-none",
+        disabled: "text-slate-300 pointer-events-none line-through opacity-50",
       }}
       {...props}
     />

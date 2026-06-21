@@ -155,7 +155,7 @@ export function ExpenseForm({
       {/* Item */}
       <fieldset>
         <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Item
+          | Item
         </label>
         <input
           type="text"
@@ -172,7 +172,7 @@ export function ExpenseForm({
       {/* Category */}
       <fieldset>
         <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Category
+          | Category
         </label>
         <div className="grid grid-cols-3 gap-2">
           {CATEGORIES.map((c) => (
@@ -196,10 +196,10 @@ export function ExpenseForm({
         )}
       </fieldset>
 
-      {/* Payment Method */}
+      {/* | Payment Method */}
       <fieldset>
         <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Payment Method
+          | Payment Method
         </label>
         <div className="grid grid-cols-3 gap-2">
           {METHODS.map((m) => (
@@ -224,7 +224,7 @@ export function ExpenseForm({
       {/* Date */}
       <fieldset>
         <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Date
+          | Date
         </label>
         <input
           type="hidden"
@@ -253,15 +253,13 @@ export function ExpenseForm({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-auto">
             <Calendar
-              mode="single"
-              selected={state.date}
-              onSelect={(d) =>
-                d && dispatch({ type: 'select_date', date: d })
-              }
-              disabled={maxDate ? (d) => d > maxDate : undefined}
-              endMonth={maxDate}
-              initialFocus
-            />
+  mode="single"
+  selected={state.date}
+  onSelect={(d) => d && dispatch({ type: 'select_date', date: d })}
+  // UBAH BARIS INI:
+  disabled={(date) => date > new Date()} 
+  initialFocus
+/>
           </PopoverContent>
         </Popover>
         {errors?.date && (
@@ -272,7 +270,7 @@ export function ExpenseForm({
       {/* Source */}
       <fieldset>
         <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Paid from
+          | Paid from
         </label>
         <div className="grid grid-cols-3 gap-2">
           {SOURCES.map((s) => (
@@ -325,7 +323,7 @@ export function ExpenseForm({
             Saving...
           </span>
         ) : isOnline ? (
-          'Save Expense'
+          'Save'
         ) : (
           'Save Offline'
         )}

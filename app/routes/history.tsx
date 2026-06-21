@@ -198,7 +198,7 @@ export default function History() {
     <main className="mx-auto flex min-h-screen max-w-md flex-col bg-white">
       <header className="flex justify-between items-center shrink-0 px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-2">
         <h1 className="text-xl font-bold tracking-tight text-slate-900">
-          Recent Expenses
+          | Recent Expenses
         </h1>
         <div className="mt-2">
           <MonthSelector
@@ -227,7 +227,7 @@ export default function History() {
       )}
 
       <div className="grid grid-cols-4 gap-1 px-4 pb-2">
-        {['All', 'Danny', 'Dewi', 'Together'].map((s) => (
+        {['All', 'Personal', 'Business'].map((s) => (
           <button
             key={s}
             onClick={() => dispatch({ type: 'SET_SOURCE_FILTER', filter: s })}

@@ -3,19 +3,15 @@ import type { ExpenseEntry } from '~/lib/types';
 const categoryColors: Record<string, string> = {
   Food: 'bg-amber-100 text-amber-800',
   Transport: 'bg-blue-100 text-blue-800',
-  Groceries: 'bg-green-100 text-green-800',
-  Utilities: 'bg-purple-100 text-purple-800',
-  Health: 'bg-red-100 text-red-800',
-  Entertainment: 'bg-pink-100 text-pink-800',
+  Bills: 'bg-green-100 text-green-800',
+  Lifesyle: 'bg-purple-100 text-purple-800',
   Shopping: 'bg-indigo-100 text-indigo-800',
-  Education: 'bg-teal-100 text-teal-800',
   Other: 'bg-slate-100 text-slate-800',
 };
 
 function sourceColor(source: string): string {
-  if (source === 'Danny') return 'bg-blue-500 text-white';
-  if (source === 'Dewi') return 'bg-rose-500 text-white';
-  if (source === 'Together') return 'bg-indigo-500 text-white';
+  if (source === 'Business') return 'bg-blue-500 text-white';
+  if (source === 'Personal') return 'bg-rose-500 text-white';
   return 'bg-slate-200 text-slate-700';
 }
 
