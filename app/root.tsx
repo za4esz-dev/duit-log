@@ -33,6 +33,18 @@ export async function loader({ request }: Route.LoaderArgs) {
   return { isAuthenticated: await isAuthenticated(request) };
 }
 
+// Inline script to apply theme before paint (prevents flash)
+const themeScript = `
+(function() {
+  try {
+    var theme = localStorage.getItem('duitlog-theme') || 'system';
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var isDark = theme === 'dark' || (theme === 'system' && prefersDark);
+    if (isDark) document.documentElement.classList.add('dark');
+  } catch(e) {}
+})();
+`;
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const [swUpdate, setSwUpdate] = useState(false);
   const [waitingWorker, setWaitingWorker] =
@@ -69,6 +81,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
       });
   }, []);
 
+  // Apply theme on system preference change
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => {
+      const theme = localStorage.getItem('duitlog-theme') || 'system';
+      if (theme === 'system') {
+        document.documentElement.classList.toggle('dark', mq.matches);
+      }
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Schedule daily reminder if set
+  useEffect(() => {
+    import('~/lib/notifications').then(({ scheduleDailyReminder }) => {
+      scheduleDailyReminder();
+    });
+  }, []);
+
   const handleUpdate = useCallback(() => {
     if (waitingWorker) {
       waitingWorker.postMessage({ type: 'SKIP_WAITING' });
@@ -89,7 +121,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [waitingWorker]);
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta
@@ -105,6 +137,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="apple-mobile-web-app-title" content="DuitLog" />
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        {/* Prevent theme flash */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <Meta />
         <Links />
       </head>
@@ -145,16 +179,17 @@ export default function App() {
       </div>
       {isAuthenticated && (
         <nav
-          className="fixed bottom-0 left-0 right-0 z-50 mx-auto flex max-w-md items-center justify-around border-t border-slate-200 bg-white py-3"
+          className="fixed bottom-0 left-0 right-0 z-50 mx-auto flex max-w-md items-center justify-around border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-3"
           style={{
             paddingBottom: 'env(safe-area-inset-bottom, 0.5rem)',
           }}
         >
+          {/* Add */}
           <NavLink
             to="/"
             end
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-4 py-2 text-xs ${isActive ? 'font-bold text-slate-900' : 'text-slate-400'}`
+              `flex flex-col items-center gap-0.5 px-4 py-2 text-xs ${isActive ? 'font-bold text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`
             }
           >
             {({ isActive }) => (
@@ -177,10 +212,12 @@ export default function App() {
               </>
             )}
           </NavLink>
+
+          {/* History */}
           <NavLink
             to="/history"
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-4 py-2 text-xs ${isActive ? 'font-bold text-slate-900' : 'text-slate-400'}`
+              `flex flex-col items-center gap-0.5 px-4 py-2 text-xs ${isActive ? 'font-bold text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`
             }
           >
             {({ isActive }) => (
@@ -199,6 +236,33 @@ export default function App() {
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
                 <span>History</span>
+              </>
+            )}
+          </NavLink>
+
+          {/* Settings */}
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-0.5 px-4 py-2 text-xs ${isActive ? 'font-bold text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={isActive ? 2.5 : 2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span>Settings</span>
               </>
             )}
           </NavLink>
@@ -231,7 +295,7 @@ export function ErrorBoundary() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center bg-white px-6 text-center">
+    <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center bg-white dark:bg-slate-950 px-6 text-center">
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
         <svg
           width="28"
@@ -248,7 +312,7 @@ export function ErrorBoundary() {
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
       </div>
-      <h1 className="text-xl font-bold text-slate-900">{message}</h1>
+      <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">{message}</h1>
       <p className="mt-2 text-sm text-slate-500">{details}</p>
       <div className="mt-6 flex gap-3">
         <a
@@ -259,7 +323,7 @@ export function ErrorBoundary() {
         </a>
         <button
           onClick={() => window.location.reload()}
-          className="rounded-xl border-2 border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300"
+          className="rounded-xl border-2 border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 transition-colors hover:border-slate-300"
         >
           Try again
         </button>

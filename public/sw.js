@@ -182,3 +182,17 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+// Handle messages from client (notifications, etc.)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { title, body, icon } = event.data;
+    event.waitUntil(
+      self.registration.showNotification(title, {
+        body,
+        icon: icon || '/icon-192.png',
+        badge: '/icon-192.png',
+        vibrate: [200, 100, 200],
+      })
+    );
+  }
+});
