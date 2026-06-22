@@ -8,14 +8,11 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
 export function isNotificationEnabled(): boolean {
   if (typeof window === 'undefined') return false;
-  return (
-    'Notification' in window && Notification.permission === 'granted'
-  );
+  return 'Notification' in window && Notification.permission === 'granted';
 }
 
 export function sendLocalNotification(title: string, body: string, icon = '/icon-192.png') {
   if (!isNotificationEnabled()) return;
-  // Use service worker notification if available for better mobile support
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({
       type: 'SHOW_NOTIFICATION',
@@ -29,6 +26,7 @@ export function sendLocalNotification(title: string, body: string, icon = '/icon
 }
 
 const REMINDER_KEY = 'duitlog-daily-reminder';
+const CUSTOM_MSG_KEY = 'duitlog-notif-message';
 
 export function getDailyReminderTime(): string | null {
   if (typeof window === 'undefined') return null;
@@ -43,7 +41,19 @@ export function setDailyReminderTime(time: string | null) {
   }
 }
 
-// Schedule a daily reminder check — called on app load
+export function getCustomNotifMessage(): string {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem(CUSTOM_MSG_KEY) || '';
+}
+
+export function setCustomNotifMessage(message: string) {
+  if (message.trim()) {
+    localStorage.setItem(CUSTOM_MSG_KEY, message.trim());
+  } else {
+    localStorage.removeItem(CUSTOM_MSG_KEY);
+  }
+}
+
 export function scheduleDailyReminder() {
   const time = getDailyReminderTime();
   if (!time || !isNotificationEnabled()) return;
@@ -57,11 +67,9 @@ export function scheduleDailyReminder() {
     if (next <= now) next.setDate(next.getDate() + 1);
     const msUntil = next.getTime() - now.getTime();
     setTimeout(() => {
-      sendLocalNotification(
-        '💰 DuitLog Reminder',
-        'Jangan lupa catat pengeluaran hari ini!',
-      );
-      scheduleNext(); // reschedule for tomorrow
+      const msg = getCustomNotifMessage() || 'Jangan lupa catat pengeluaran hari ini!';
+      sendLocalNotification('💰 DuitLog Reminder', msg);
+      scheduleNext();
     }, msUntil);
   }
 
@@ -71,14 +79,8 @@ export function scheduleDailyReminder() {
 export function sendBudgetWarningNotification(percentage: number, remaining: number) {
   const formattedRemaining = new Intl.NumberFormat('id-ID').format(remaining);
   if (percentage >= 100) {
-    sendLocalNotification(
-      '🚨 Budget Terlampaui!',
-      `Pengeluaran bulan ini sudah melebihi budget kamu.`,
-    );
+    sendLocalNotification('🚨 Budget Terlampaui!', 'Pengeluaran bulan ini sudah melebihi budget kamu.');
   } else if (percentage >= 80) {
-    sendLocalNotification(
-      '⚠️ Budget Hampir Habis',
-      `Sisa budget bulan ini: IDR ${formattedRemaining}`,
-    );
+    sendLocalNotification('⚠️ Budget Hampir Habis', `Sisa budget bulan ini: IDR ${formattedRemaining}`);
   }
-}
+}}
