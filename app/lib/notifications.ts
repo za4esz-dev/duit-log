@@ -83,4 +83,4 @@ export function sendBudgetWarningNotification(percentage: number, remaining: num
   } else if (percentage >= 80) {
     sendLocalNotification('⚠️ Budget Hampir Habis', `Sisa budget bulan ini: IDR ${formattedRemaining}`);
   }
-}}
+}
